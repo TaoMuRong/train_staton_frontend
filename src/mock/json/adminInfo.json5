@@ -3,7 +3,7 @@
   "data": {
     "id": 1,
     "username": "123",
-    "auth": "user"
+    "auth": "admin"
   },
   "errCode": null,
   "message": null

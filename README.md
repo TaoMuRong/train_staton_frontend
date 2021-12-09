@@ -2,7 +2,7 @@
 
 ## Description
 
-书城前端
+HUBU数据库课程设计火车模拟售票系统前端
 
 ## Installation
 

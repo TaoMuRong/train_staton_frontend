@@ -10,6 +10,7 @@
   "dependencies": {
     "ali-oss": "^6.15.2",
     "axios": "^0.21.1",
+    "body-parser": "^1.19.0",
     "concurrently": "^6.0.0",
     "core-js": "^3.6.5",
     "cors": "^2.8.5",

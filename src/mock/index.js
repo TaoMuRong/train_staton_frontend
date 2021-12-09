@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 const express = require('express')
+const bodyParser = require('body-parser')
 const Mock = require('mockjs')
 const cors = require('cors')
 const fs = require('fs')
@@ -7,6 +8,13 @@ const path = require('path')
 const JSON5 = require('json5')
 
 const app = express()
+//配置body-parser
+//只要加入这个配置，就会在req加一个属性body
+//可以通过req.body获取post表单请求体数据
+app.use(bodyParser.urlencoded({extend:false}))
+app.use(bodyParser.json())
+
+
 app.all('*',function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header('Access-Control-Allow-Methods', 'PUT, GET, POST, DELETE, OPTIONS');
@@ -25,8 +33,21 @@ function getJsonFile(filePath) {
 // eslint-disable-next-line no-cond-assign,no-constant-condition
 if (process.env.Mock = "true") {
   app.post('/member/login',function (rep,res) {
-    let json = getJsonFile('./json/userInfo.json5')
-    res.json(Mock.mock(json))
+    const {
+      username,
+      password
+    } = rep.body
+
+    if (username==="user"&&password==="123") {
+      let json = getJsonFile('./json/userInfo.json5')
+      res.json(Mock.mock(json))
+    } else if (username==="admin"&&password==="123") {
+      let json = getJsonFile('./json/adminInfo.json5')
+      res.json(Mock.mock(json))
+    } else {
+      let json = getJsonFile('./json/userNotFound.json5')
+      res.json(Mock.mock(json))
+    }
   })
   app.post('/member/logout',function (rep,res) {
     let json = getJsonFile('./json/logOut.json5')
