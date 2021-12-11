@@ -8,6 +8,8 @@ import './assets/css/theme/index.css';
 import nprogress from 'nprogress'
 import 'nprogress/nprogress.css'
 import axios from 'axios'
+// 引入typo.css
+import './assets/css/typo.css'
 import './assets/css/normalize.css'
 import './assets/css/elcss.css'
 
