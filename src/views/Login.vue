@@ -24,9 +24,27 @@
           ></el-input>
         </el-form-item>
         <el-form-item class="item-btn">
-          <el-button type="primary" class="login-btn" @click.enter="onLogin" size="small"
-            >登录</el-button
+          <el-popover
+              placement="top"
+              width="400"
+              trigger="click"
           >
+            <!--验证码-->
+            <div>
+              <vab-verify
+                  ref="slideDiv"
+                  :w="350"
+                  :slider-text="text"
+                  :h="175"
+                  @success="handleSuccess"
+                  @fail="handleError"
+              ></vab-verify>
+            </div>
+            <el-button type="primary" class="login-btn"  size="small" slot="reference">
+              登录
+            </el-button>
+
+          </el-popover>
           <el-button type="primary" @click="onRegistry" class="registry-btn" size="small"
             >注册</el-button
           >
@@ -87,7 +105,9 @@
 <script>
 import { mapMutations } from "vuex";
 import axios from "axios";
+import VabVerify from '../plugin/vabVerify'
 export default {
+  components: { VabVerify },
   data() {
     const checkconfirmPWD = (rule, value, callback) => {
       if (value === "") {
@@ -99,6 +119,7 @@ export default {
       }
     };
     return {
+      text: "向右滑动",
       loginInfo: {
         username: "",
         password: "",
@@ -119,7 +140,6 @@ export default {
         ],
         confirmPWD: [{ validator: checkconfirmPWD, trigger: "change" }],
       },
-
       loginInfoRules: {
         username: {
           required: true,
@@ -128,7 +148,6 @@ export default {
         },
         password: { required: true, message: "请输入密码", trigger: "blur" },
       },
-
       registerDialogVis: false,
     };
   },
@@ -136,6 +155,13 @@ export default {
     ...mapMutations({
       setRole: "SET_ROLE",
     }),
+    // 验证成功则登陆
+    handleSuccess () {
+      this.onLogin()
+    },
+    handleError () {
+      this.$message.error('验证失败')
+    },
     onLogin() {
       this.$refs["loginInfoForm"].validate(async (valid) => {
         if (valid) {

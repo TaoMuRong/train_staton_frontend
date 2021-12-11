@@ -14,7 +14,7 @@
             ]"
             @click="handleHeaderClick('book_mall')"
           >
-            书城logo
+            车票
           </div>
           <div
             :class="[
@@ -23,7 +23,7 @@
             ]"
             @click="handleHeaderClick('cart')"
           >
-            我的购物车
+            订单
           </div>
           <div
             :class="[
@@ -32,7 +32,7 @@
             ]"
             @click="handleHeaderClick('order')"
           >
-            我的订单
+            个人信息
           </div>
         </div>
 
