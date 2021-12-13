@@ -12,12 +12,12 @@
         ref="loginInfoForm"
         hide-required-asterisk
       >
-        <el-form-item label="用户名" prop="username">
-          <el-input v-model="loginInfo.username" class="login-input"></el-input>
+        <el-form-item label="用户名" prop="userName">
+          <el-input v-model="loginInfo.userName" class="login-input"></el-input>
         </el-form-item>
-        <el-form-item label="密码" prop="password">
+        <el-form-item label="密码" prop="pwd">
           <el-input
-            v-model="loginInfo.password"
+            v-model="loginInfo.pwd"
             type="password"
             show-password
             class="login-input"
@@ -40,7 +40,7 @@
                   @fail="handleError"
               ></vab-verify>
             </div>
-            <el-button type="primary" class="login-btn"  size="small" slot="reference">
+            <el-button type="primary" class="login-btn"  size="small" slot="reference" >
               登录
             </el-button>
 
@@ -104,7 +104,6 @@
 
 <script>
 import { mapMutations } from "vuex";
-import axios from "axios";
 import VabVerify from '../plugin/vabVerify'
 export default {
   components: { VabVerify },
@@ -121,8 +120,8 @@ export default {
     return {
       text: "向右滑动",
       loginInfo: {
-        username: "",
-        password: "",
+        pwd: "",
+        userName: "",
       },
       registerInfo: {
         username: "",
@@ -167,7 +166,7 @@ export default {
         if (valid) {
           try {
             const { data } = await this.$http.post(
-              "/member/login",
+              "/user/login",
               this.loginInfo
             );
             if (data.success) {
@@ -179,7 +178,7 @@ export default {
               });
               const role = data.data.auth;
               const accountId = data.data.id;
-              const username = data.data.username;
+              const username = data.data.userName;
               const token = data.data.token
               window.sessionStorage.setItem('token', token)
               this.setRole({ role, accountId, username });
@@ -259,13 +258,13 @@ export default {
     },
   },
   mounted: function () {
-    axios.get('user/userInfo')
-    .then(res => {
-      console.log(res)
-    })
-    .catch(err =>{
-      console.log(err)
-    })
+    // axios.get('user/userInfo')
+    // .then(res => {
+    //   console.log(res)
+    // })
+    // .catch(err =>{
+    //   console.log(err)
+    // })
   }
 };
 </script>
