@@ -28,6 +28,7 @@
               placement="top"
               width="400"
               trigger="click"
+              :value="VabVerifyVis"
           >
             <!--验证码-->
             <div>
@@ -40,16 +41,13 @@
                   @fail="handleError"
               ></vab-verify>
             </div>
-            <el-button type="primary" class="login-btn"  size="small" slot="reference" >
+            <el-button :loading="loading" type="primary" class="login-btn"  size="small" slot="reference" @click="VabVerifyVis=!VabVerifyVis">
               登录
             </el-button>
 
           </el-popover>
-          <el-button type="primary" @click="onRegistry" class="registry-btn" size="small"
+          <el-button type="success" @click="onRegistry" class="registry-btn" size="small"
             >注册</el-button
-          >
-          <el-button type="success" @click="onVisit" class="tourist-btn" size="small"
-          >游客</el-button
           >
         </el-form-item>
       </el-form>
@@ -119,6 +117,8 @@ export default {
     };
     return {
       text: "向右滑动",
+      loading:false,
+      VabVerifyVis:false,
       loginInfo: {
         pwd: "",
         userName: "",
@@ -194,6 +194,7 @@ export default {
                 showClose: true,
                 duration: 1500,
               });
+              this.$refs.slideDiv.reset()
             }
           } catch (err) {
             this.$message({
@@ -208,12 +209,6 @@ export default {
 
     onRegistry() {
       this.registerDialogVis = true;
-    },
-    // 游客
-    onVisit () {
-      this.$message.success("正在跳转")
-      // 编程式导航，跳转至书城主页
-      this.$router.replace("/book_mall")
     },
     handleDialogClosed() {
       this.$refs["registerInfoForm"].resetFields();
@@ -296,15 +291,13 @@ export default {
       display: flex;
       flex-direction: column;
       justify-content: center;
-
-      .item-btn {
-        .login-btn {
-          margin-right: 30px;
-        }
-        .tourist-btn {
-
-        }
-      }
+    }
+    .item-btn {
+      display: flex;
+      justify-content: flex-end;
+    }
+    .item-btn .el-button {
+      margin-left: 10px;
     }
   }
 }

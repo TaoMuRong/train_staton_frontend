@@ -175,8 +175,11 @@ export default {
 
     async logout() {
       try {
-        const { data } = await this.$http.post("/member/logout");
+        console.log("???")
+        const { data } = await this.$http.get("/user/logout");
+        console.log(data)
         if (data.success) {
+          console.log(data)
           window.sessionStorage.clear()
           this.$store.commit("REMOVE_ROLE");
           this.$router.replace({
@@ -196,6 +199,10 @@ export default {
           duration: 1500,
         });
       }
+      // window.sessionStorage.clear();
+      // this.$router.replace({
+      //   name: "login",
+      // });
     },
 
     goAdminStage() {
