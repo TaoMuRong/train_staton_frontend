@@ -110,8 +110,7 @@
 
 <script>
 import { mapMutations } from "vuex";
-import { isIdentityId } from "../views/validate";
-import { isTel } from "../views/validate2";
+import { isIdentityId,isTel } from "../views/validate";
 import VabVerify from '../plugin/vabVerify'
 export default {
   components: { VabVerify },
