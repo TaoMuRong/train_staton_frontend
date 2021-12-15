@@ -69,26 +69,34 @@
         ref="registerInfoForm"
         hide-required-asterisk
       >
-        <el-form-item label="用户名" prop="username">
+        <el-form-item label="用户昵称" prop="userName">
           <el-input
-            v-model="registerInfo.username"
+            v-model="registerInfo.userName"
             autocomplete="off"
           ></el-input>
         </el-form-item>
-        <el-form-item label="密码" prop="password">
+        <el-form-item label="性别" prop="gender">
+          <el-radio v-model="registerInfo.gender" label="男">男</el-radio>
+          <el-radio v-model="registerInfo.gender" label="女">女</el-radio>
+        </el-form-item>
+        <el-form-item label="密码" prop="pwd">
           <el-input
-            v-model="registerInfo.password"
+            v-model="registerInfo.pwd"
             autocomplete="off"
             type="password"
             show-password
           ></el-input>
         </el-form-item>
-        <el-form-item label="确认密码" prop="confirmPWD">
+        <el-form-item label="身份证号" prop="identityCard">
           <el-input
-            v-model="registerInfo.confirmPWD"
+            v-model="registerInfo.identityCard"
             autocomplete="off"
-            type="password"
-            show-password
+          ></el-input>
+        </el-form-item>
+        <el-form-item label="电话号" prop="tel">
+          <el-input
+            v-model="registerInfo.tel"
+            autocomplete="off"
           ></el-input>
         </el-form-item>
       </el-form>
@@ -102,19 +110,39 @@
 
 <script>
 import { mapMutations } from "vuex";
+import { isIdentityId } from "../views/validate";
+import { isTel } from "../views/validate2";
 import VabVerify from '../plugin/vabVerify'
 export default {
   components: { VabVerify },
   data() {
-    const checkconfirmPWD = (rule, value, callback) => {
-      if (value === "") {
-        callback(new Error("请输入密码"));
-      } else if (value !== this.registerInfo.password) {
-        callback(new Error("两次输入密码不一致"));
+    // const checkconfirmPWD = (rule, value, callback) => {
+    //   if (value === "") {
+    //     callback(new Error("请输入密码"));
+    //   } else if (value !== this.registerInfo.pwd) {
+    //     callback(new Error("两次输入密码不一致"));
+    //   } else {
+    //     callback();
+    //   }
+    // };
+    const checkIdentitytionId  = (rule, value, callback) => {
+      var errorMsg = isIdentityId(value);
+      if (errorMsg != "") {
+        callback(new Error(errorMsg));
+      } else {
+        callback();
+      }
+      
+    };
+    const checkMobile  = (rule, value, callback) => {
+      var errorMsg = isTel(value);
+      if (errorMsg != "") {
+        callback(new Error(errorMsg));
       } else {
         callback();
       }
     };
+
     return {
       text: "向右滑动",
       loading:false,
@@ -124,20 +152,27 @@ export default {
         userName: "",
       },
       registerInfo: {
-        username: "",
-        password: "",
-        confirmPWD: "",
+        userName: "",
+        pwd: "",
+        gender: "男",
+        identityCard: "410702196402192530", // 默认为失信人员身份证
+        tel: 13990000000
       },
       registerInfoRules: {
-        username: [
+        userName: [
           { required: true, message: "请输入新用户名", trigger: "blur" },
           { min: 3, max: 5, message: "长度在 3 到 5 个字符", trigger: "blur" },
         ],
-        password: [
+        pwd: [
           { required: true, message: "请输入新密码", trigger: "blur" },
           { min: 3, max: 5, message: "长度在 3 到 5 个字符", trigger: "blur" },
         ],
-        confirmPWD: [{ validator: checkconfirmPWD, trigger: "change" }],
+        identityCard: [
+          { validator: checkIdentitytionId , trigger: "change" }
+        ],
+        tel: [
+          { validator: checkMobile , trigger: "change" }
+        ],
       },
       loginInfoRules: {
         username: {
@@ -218,10 +253,7 @@ export default {
       this.$refs["registerInfoForm"].validate(async (valid) => {
         if (valid) {
           try {
-            const { data } = await this.$http.post("/member/register", {
-              username: this.registerInfo.username,
-              password: this.registerInfo.password,
-            });
+            const { data } = await this.$http.post("/user/register", this.registerInfo);
             console.log(data);
             if (data.success) {
               this.$message({
