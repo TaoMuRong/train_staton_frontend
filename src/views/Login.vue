@@ -110,32 +110,23 @@
 
 <script>
 import { mapMutations } from "vuex";
-import { isIdentityId,isTel } from "../views/validate";
+import { isIdentityId,isTel } from "@/views/validate";
 import VabVerify from '../plugin/vabVerify'
 export default {
   components: { VabVerify },
   data() {
-    // const checkconfirmPWD = (rule, value, callback) => {
-    //   if (value === "") {
-    //     callback(new Error("请输入密码"));
-    //   } else if (value !== this.registerInfo.pwd) {
-    //     callback(new Error("两次输入密码不一致"));
-    //   } else {
-    //     callback();
-    //   }
-    // };
     const checkIdentitytionId  = (rule, value, callback) => {
-      var errorMsg = isIdentityId(value);
-      if (errorMsg != "") {
+      let errorMsg = isIdentityId(value);
+      if (errorMsg !== "") {
         callback(new Error(errorMsg));
       } else {
         callback();
       }
-      
+
     };
     const checkMobile  = (rule, value, callback) => {
-      var errorMsg = isTel(value);
-      if (errorMsg != "") {
+      let errorMsg = isTel(value);
+      if (errorMsg !== "") {
         callback(new Error(errorMsg));
       } else {
         callback();
@@ -154,8 +145,8 @@ export default {
         userName: "",
         pwd: "",
         gender: "男",
-        identityCard: "410702196402192530", // 默认为失信人员身份证
-        tel: 13990000000
+        identityCard: "", // 默认为失信人员身份证
+        tel: null
       },
       registerInfoRules: {
         userName: [
@@ -164,7 +155,7 @@ export default {
         ],
         pwd: [
           { required: true, message: "请输入新密码", trigger: "blur" },
-          { min: 3, max: 5, message: "长度在 3 到 5 个字符", trigger: "blur" },
+          { min: 3, max: 10, message: "长度在 3 到 10 个字符", trigger: "blur" },
         ],
         identityCard: [
           { validator: checkIdentitytionId , trigger: "change" }
@@ -217,9 +208,9 @@ export default {
               window.sessionStorage.setItem('token', token)
               this.setRole({ role, accountId, username });
               if (role === "admin" || role === "finance" || role === "manager") {
-                this.$router.replace({ path: "/admin" });
+                await this.$router.replace({path: "/admin"});
               } else {
-                this.$router.replace({ path: "/home" });
+                await this.$router.replace({path: "/home"});
               }
             } else {
               this.$message({
@@ -237,7 +228,7 @@ export default {
               duration: 1500,
             });
           }
-        } else return;
+        }
       });
     },
 
@@ -275,22 +266,13 @@ export default {
               duration: 1500,
             });
           }
-        } else return;
+        }
       });
     },
 
     handleDialogCancel() {
       this.registerDialogVis = false;
     },
-  },
-  mounted: function () {
-    // axios.get('user/userInfo')
-    // .then(res => {
-    //   console.log(res)
-    // })
-    // .catch(err =>{
-    //   console.log(err)
-    // })
   }
 };
 </script>
