@@ -19,111 +19,111 @@
         </el-image>
       </div>
       <div id="login-container" style="position: absolute; top: 50%; left: 50%; margin-left: 215px; margin-top: -380px;">
-    <!-- 登录 -->
-    <div class="login-form-wrap">
-      <el-form
-        label-position="left"
-        label-width="80px"
-        :model="loginInfo"
-        size="medium"
-        class="login-form"
-        :rules="loginInfoRules"
-        ref="loginInfoForm"
-        hide-required-asterisk
-      >
-        <el-form-item label="用户名" prop="userName">
-          <el-input v-model="loginInfo.userName" class="login-input"></el-input>
-        </el-form-item>
-        <el-form-item label="密码" prop="pwd">
-          <el-input
-            v-model="loginInfo.pwd"
-            type="password"
-            show-password
-            class="login-input"
-          ></el-input>
-        </el-form-item>
-        <el-form-item class="item-btn">
-          <el-popover
-              placement="top"
-              width="400"
-              trigger="click"
-              :value="VabVerifyVis"
+        <!-- 登录 -->
+        <div class="login-form-wrap">
+          <el-form
+            label-position="left"
+            label-width="80px"
+            :model="loginInfo"
+            size="medium"
+            class="login-form"
+            :rules="loginInfoRules"
+            ref="loginInfoForm"
+            hide-required-asterisk
           >
-            <!--验证码-->
-            <div>
-              <vab-verify
-                  ref="slideDiv"
-                  :w="350"
-                  :slider-text="text"
-                  :h="175"
-                  @success="handleSuccess"
-                  @fail="handleError"
-              ></vab-verify>
-            </div>
-            <el-button :loading="loading" type="primary" class="login-btn"  size="medium" slot="reference" @click="VabVerifyVis=!VabVerifyVis">
-              登录
-            </el-button>
+            <el-form-item label="用户名" prop="userName">
+              <el-input v-model="loginInfo.userName" class="login-input"></el-input>
+            </el-form-item>
+            <el-form-item label="密码" prop="pwd">
+              <el-input
+                v-model="loginInfo.pwd"
+                type="password"
+                show-password
+                class="login-input"
+              ></el-input>
+            </el-form-item>
+            <el-form-item class="item-btn">
+              <el-popover
+                  placement="top"
+                  width="400"
+                  trigger="click"
+                  :value="VabVerifyVis"
+              >
+                <!--验证码-->
+                <div>
+                  <vab-verify
+                      ref="slideDiv"
+                      :w="350"
+                      :slider-text="text"
+                      :h="175"
+                      @success="handleSuccess"
+                      @fail="handleError"
+                  ></vab-verify>
+                </div>
+                <el-button :loading="loading" type="primary" class="login-btn"  size="medium" slot="reference" @click="VabVerifyVis=!VabVerifyVis">
+                  登录
+                </el-button>
 
-          </el-popover>
-          <el-button type="success" @click="onRegistry" class="registry-btn" size="medium"
-            >注册</el-button
+              </el-popover>
+              <el-button type="success" @click="onRegistry" class="registry-btn" size="medium"
+                >注册</el-button
+              >
+            </el-form-item>
+          </el-form>
+        </div>
+
+        <!-- 注册 -->
+        <el-dialog
+          title="用户注册"
+          :visible.sync="registerDialogVis"
+          width="25%"
+          @closed="handleDialogClosed"
+        >
+          <el-form
+            :model="registerInfo"
+            label-width="80px"
+            label-position="left"
+            size="medium"
+            :rules="registerInfoRules"
+            ref="registerInfoForm"
+            hide-required-asterisk
           >
-        </el-form-item>
-      </el-form>
-    </div>
-
-    <!-- 注册 -->
-    <el-dialog
-      title="用户注册"
-      :visible.sync="registerDialogVis"
-      width="25%"
-      @closed="handleDialogClosed"
-    >
-      <el-form
-        :model="registerInfo"
-        label-width="80px"
-        label-position="left"
-        size="medium"
-        :rules="registerInfoRules"
-        ref="registerInfoForm"
-        hide-required-asterisk
-      >
-        <el-form-item label="用户昵称" prop="userName">
-          <el-input
-            v-model="registerInfo.userName"
-            autocomplete="off"
-          ></el-input>
-        </el-form-item>
-        <el-form-item label="性别" prop="gender">
-          <el-radio v-model="registerInfo.gender" label="男">男</el-radio>
-          <el-radio v-model="registerInfo.gender" label="女">女</el-radio>
-        </el-form-item>
-        <el-form-item label="密码" prop="pwd">
-          <el-input
-            v-model="registerInfo.pwd"
-            autocomplete="off"
-            type="password"
-            show-password
-          ></el-input>
-        </el-form-item>
-        <el-form-item label="身份证号" prop="identityCard">
-          <el-input
-            v-model="registerInfo.identityCard"
-            autocomplete="off"
-          ></el-input>
-        </el-form-item>
-        <el-form-item label="电话号" prop="tel">
-          <el-input
-            v-model="registerInfo.tel"
-            autocomplete="off"
-          ></el-input>
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="handleDialogConfirm">确 定</el-button>
-        <el-button @click="handleDialogCancel">取 消</el-button>
-      </div>
-    </el-dialog>
+            <el-form-item label="用户昵称" prop="userName">
+              <el-input
+                v-model="registerInfo.userName"
+                autocomplete="off"
+              ></el-input>
+            </el-form-item>
+            <el-form-item label="性别" prop="gender">
+              <el-radio v-model="registerInfo.gender" label="男">男</el-radio>
+              <el-radio v-model="registerInfo.gender" label="女">女</el-radio>
+            </el-form-item>
+            <el-form-item label="密码" prop="pwd">
+              <el-input
+                v-model="registerInfo.pwd"
+                autocomplete="off"
+                type="password"
+                show-password
+              ></el-input>
+            </el-form-item>
+            <el-form-item label="身份证号" prop="identityCard">
+              <el-input
+                v-model="registerInfo.identityCard"
+                autocomplete="off"
+              ></el-input>
+            </el-form-item>
+            <el-form-item label="电话号" prop="tel">
+              <el-input
+                v-model="registerInfo.tel"
+                autocomplete="off"
+              ></el-input>
+            </el-form-item>
+          </el-form>
+          <div slot="footer" class="dialog-footer">
+            <el-button type="primary" @click="handleDialogConfirm">确 定</el-button>
+            <el-button @click="handleDialogCancel">取 消</el-button>
+          </div>
+        </el-dialog>
       </div>
     </div>
     <!-- 底部 -->

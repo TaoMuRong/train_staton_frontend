@@ -27,7 +27,7 @@
                   :key="item.id"
                   @click="handleMenuItemClick(item)"
               >
-                <i class="el-icon-menu" v-if="item.name === '分类管理'"></i>
+                <i class="el-icon-menu" v-if="item.name === '车次管理'"></i>
                 <i
                     class="el-icon-collection"
                     v-else-if="item.name === '图书管理'"
@@ -142,7 +142,7 @@ export default {
         },
         {
           id: "2",
-          name: "分类管理",
+          name: "车次管理",
           path: "/admin/sort_management",
         },
         {
@@ -203,10 +203,10 @@ export default {
     this.operator = localStorage.username
     this.currPagePath = sessionStorage.getItem('currPagePath') ? sessionStorage.getItem('currPagePath') : this.$route.fullPath
     this.currPageName = sessionStorage.getItem('currPageName') ? sessionStorage.getItem('currPageName') : '销量统计'
-    console.log(this.$route.fullPath);
+    // console.log(this.$route.fullPath);
   },
   mounted() {
-    console.log(this.$route.fullPath);
+    // console.log(this.$route.fullPath);
   },
 
   methods: {
