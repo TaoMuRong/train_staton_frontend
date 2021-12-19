@@ -27,10 +27,10 @@
                   :key="item.id"
                   @click="handleMenuItemClick(item)"
               >
-                <i class="el-icon-menu" v-if="item.name === '车次管理'"></i>
+                <i class="el-icon-menu" v-if="item.name === '经停站管理'"></i>
                 <i
                     class="el-icon-collection"
-                    v-else-if="item.name === '图书管理'"
+                    v-else-if="item.name === '车次管理'"
                 ></i>
                 <i class="el-icon-folder" v-else-if="item.name === '文件管理'"></i>
                 <i class="el-icon-s-data" v-else-if="item.name === '销量统计'"></i>
@@ -142,13 +142,13 @@ export default {
         },
         {
           id: "2",
-          name: "车次管理",
-          path: "/admin/sort_management",
+          name: "经停站管理",
+          path: "/admin/station_management",
         },
         {
           id: "3",
-          name: "图书管理",
-          path: "/admin/book_management",
+          name: "车次管理",
+          path: "/admin/train_management",
         },
          {
           id: "4",

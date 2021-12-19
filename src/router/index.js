@@ -21,8 +21,8 @@ const ErrorPage = () => import('../views/ErrorPage.vue')
 const BookMall = () => import('../views/home/BookMall.vue')
 const Cart = () => import('../views/home/Cart.vue')
 const Order = () => import('../views/home/Order.vue')
-const SortManagement = () => import('../views/admin/SortManagement.vue')
-const BookManagement = () => import('../views/admin/BookManagement.vue')
+const StationManagement = () => import('../views/admin/StationManagement.vue')
+const TrainManagement = () => import('../views/admin/TrainManagement.vue')
 const SalesStatistics = () => import('../views/admin/SalesStatistics')
 const NoPermission = () => import('../views/NoPermission.vue')
 const BookDetail = () => import('../views/home/BookDetail.vue')
@@ -108,19 +108,19 @@ const routes = [{
       roles: ['admin', 'finance']
     },
     children: [{
-        name: 'sort_management',
-        path: 'sort_management',
+        name: 'station_management',
+        path: 'station_management',
         meta: {
           roles: ['admin', 'finance', 'manager']
         },
-        component: SortManagement
+        component: StationManagement
       }, {
-        name: 'book_management',
-        path: 'book_management',
+        name: 'train_management',
+        path: 'train_management',
         meta: {
           roles: ['admin', 'finance', 'manager']
         },
-        component: BookManagement
+        component: TrainManagement
       },
       {
         name: 'file_management',
