@@ -1,119 +1,246 @@
 <template>
   <div>
     <el-container >
-      <!--    侧栏开始-->
-      <el-aside width="234px">
-        <el-row class="tac">
-          <el-col :span="20">
-            <el-menu
-                default-active="1"
-                active-text-color="#555555"
-                class="el-menu-vertical-demo"
-                :unique-opened="true"
-                @open="handleOpen"
-                @close="handleClose">
-              <el-menu-item index="0">
-                <span slot="title">所有分类</span>
-              </el-menu-item>
-              <el-submenu v-for="item in categoryList" :key="item.id" :index="item.id + ''">
-                <template slot="title">
-                  <span>{{item.title}}</span>
-                </template>
-                <el-menu-item :index="item.parentId + '-' + option.id" v-for="option in item.children" :key="option.id" @click="handleOpen(option.id)">
-                  {{option.title}}
-                </el-menu-item>
-              </el-submenu>
-            </el-menu>
-          </el-col>
-        </el-row>
-
-
-      </el-aside>
       <!--    中心部分开始-->
       <el-main >
-        <div class="view_area">
-          <ul class="show" >
-              <li v-for="item in items.list" :key="item.id" class="showDiv" >
-                <div class="showBox">
-                  <router-link :to="'/home/book_detail/' + item.id" >
-                    <img :src="item.cover" alt="斗罗大陆">
-                    <div class="showBox_detail">
-                      <p class="book_price">￥{{item.price}}</p>
-                      <h4 class="book_title">《{{item.bookName}}》</h4>
-                      <p>作者：{{item.author}}</p>
-                      <p>出版社：{{item.press}}</p>
-                      <p>出版时间：{{item.publishTime | timeFormat()}}</p>
-                    </div>
-                  </router-link>
+        <div class="sear-box">
+          <el-card class="box-card">
+            <el-row type="flex" class="row-bg" justify="space-around">
+              <el-col :span="6">
+                  <el-select v-model="stationInfo.startStation" filterable placeholder="出发地">
+                  <el-option
+                      v-for="item in options"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value">
+                  </el-option>
+                </el-select>
+              </el-col>
+              <el-col :span="6">
+                <el-select v-model="stationInfo.endStation" filterable placeholder="目的地">
+                  <el-option
+                      v-for="item in options"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value">
+                  </el-option>
+                </el-select>
+              </el-col>
+              <el-col :span="6" >
+                <div class="btn-contain">
+                  <el-button type="success" @click="handleQueryTrains">
+                    车次查询
+                  </el-button>
                 </div>
-              </li>
-          </ul>
+              </el-col>
+            </el-row>
+          </el-card>
         </div>
+
+        <div class="list-box">
+          <el-card class="box-card2">
+                <el-table :data="trainNumbers" border stripe v-loading="loading">
+                  <el-table-column type="expand" >
+                    <template slot-scope="props">
+                      <span style="display:block; marginBottom: 10px;">该车次所有经停站及到达/出发时间：</span>
+                      <el-steps :active="props.row.parkStationList.length">
+                        <el-step
+                            v-for="(station, index) in props.row.parkStationList"
+                            :key="index"
+                            :title="station.stationName"
+                            :description="`${station.arriveTime} / ${station.startTime}`"></el-step>
+                      </el-steps>
+                    </template>
+                  </el-table-column>
+                  <el-table-column prop="trainNumber" label="车次">
+                  </el-table-column>
+                  <el-table-column prop="startStation" label="出发地"></el-table-column>
+                  <el-table-column prop="endStation" label="目的地"></el-table-column>
+                  <el-table-column prop="arriveTime" label="到站时间"></el-table-column>
+                  <el-table-column prop="startTime" label="发车时间"></el-table-column>
+                  <el-table-column prop="runningTime" label="历时"></el-table-column>
+                  <el-table-column prop="firstSeat" label="一等座"></el-table-column>
+                  <el-table-column prop="secondSeat" label="二等座"></el-table-column>
+                  <el-table-column prop="level" label="操作">
+                    <template slot-scope="scope">
+                      <el-button size="medium" type="primary" :disabled="scope.row.distance===undefined?true:false" @click="handleBookTicket(scope.row.trainNumber, scope.row.distance, scope.row.startStation, scope.row.endStation)">
+                        预订
+                      </el-button>
+                    </template>
+                  </el-table-column>
+                </el-table>
+              </el-card>
+        </div>
+
+<!--        放置选择订票的dialog-->
+        <el-dialog
+            title="提示"
+            :visible.sync="bookDialogVisible"
+            width="30%"
+            @close="editUserDialogClosed"
+        >
+          <el-form :model="bookTicketInfo" label-width="70px">
+            <el-form-item label="车次" prop="trainNumber">
+              <el-input v-model="bookTicketInfo.trainNumber" disabled></el-input>
+            </el-form-item>
+            <el-form-item label="始发站" prop="startStation">
+              <el-input v-model="bookTicketInfo.startStation" disabled></el-input>
+            </el-form-item>
+            <el-form-item label="终点站" prop="endStation">
+              <el-input v-model="bookTicketInfo.endStation" disabled></el-input>
+            </el-form-item>
+
+            <el-form-item label="座位类型">
+              <el-select v-model="bookTicketInfo.price" filterable placeholder="选座" @change="changeSeatType">
+                <el-option
+                    v-for="item in seatInfo"
+                    :key="item.price"
+                    :label="item.title"
+                    :value="item.price">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="价格" prop="price">
+              <el-input v-model="bookTicketInfo.price" disabled></el-input>
+            </el-form-item>
+
+          </el-form>
+          <span slot="footer" class="dialog-footer">
+        <el-button @click="bookDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="bookTicket">确认支付</el-button>
+      </span>
+        </el-dialog>
       </el-main>
-      <el-pagination
-          background
-          layout="prev, pager, next"
-          :total="items.pageCount"
-          :page-size="items.pageSize"
-          :page-count="items.totalPage"
-          @current-change="currentChange"
-          >
-      </el-pagination>
 <!--      中心部分结束-->
     </el-container>
   </div>
 </template>
 
-
 <script>
 export default {
   data () {
     return {
-      items: {},
-      categoryList: {}
+      // 设置表格加载状态
+      loading: true,
+      // 存储dialog是否可见
+      bookDialogVisible: false,
+      // 存储返回的可订座的信息
+      seatInfo: null,
+      // 存储支付前需要的订票信息
+      bookTicketInfo: {
+        startStation: "",
+        endStation: "",
+        trainNumber: "",
+        seatType: "",
+        price: null
+      },
+      // 存储车次的总页数
+      totalTrainNums: 0,
+      // 存储根据始发站与终点站查询车次的信息
+      stationInfo: {
+        startStation: "",
+        endStation: ""
+      },
+      // 存储车次信息列表
+      trainNumbers: [],
+      // 存储始发站与终点站的options
+      options: [
+        {
+          value: '武昌',
+          label: '武昌'
+        }, {
+          value: '武汉',
+          label: '武汉'
+        }, {
+          value: '汉口',
+          label: '汉口'
+        }, {
+          value: '汉川',
+          label: '汉川'
+        }, {
+          value: '天门',
+          label: '天门'
+        }, {
+          value: '仙桃',
+          label: '仙桃'
+        }, {
+          value: '潜江',
+          label: '潜江'
+        }, {
+          value: '荆州',
+          label: '荆州'
+        }, {
+          value: '枝江',
+          label: '枝江'
+        }, {
+          value: '荆门',
+          label: '荆门'
+        }, {
+          value: '当阳',
+          label: '当阳'
+        }, {
+          value: '宜昌',
+          label: '宜昌'
+        }
+      ]
     }
   },
   methods: {
-    handleOpen(key) {
-      this.getBooksById(parseInt(key),1)
+    // 直接获取所有车次信息
+    async getAllTrainNums () {
+      const { data:res } = await this.$http.get('/train/queryAllTrainNoPage')
+      if (res.code !== 200) return this.$message.error(res.message)
+      this.trainNumbers = res.data
+      this.loading = false
     },
-    handleClose() {
-      this.getBooksById(0,1)
+    // 根据始发站与终点站查询车次
+    async handleQueryTrains () {
+      this.loading = true
+      const { data:res } = await this.$http.get('/train/queryByStation?startStation=' + this.stationInfo.startStation +'&endStation=' + this.stationInfo.endStation)
+      if (res.code !== 200) return this.$message.error(res.message)
+      this.trainNumbers = res.data
+      this.loading = false
     },
-    currentChange(currentPage) {
-      this.getBooksById(0,currentPage)
+    // 预定车票
+    async handleBookTicket (trainNumber, distance, startStation, endStation) {
+      const { data:res } = await this.$http.get('/order/reserveTicket?trainNumber=' + trainNumber + '&distance=' + distance)
+      if (res.code !== 200) return this.$message.error(res.message)
+      // 显示订票具体信息的dialog
+      this.bookDialogVisible = !this.bookDialogVisible
+      this.seatInfo = res.data
+      this.bookTicketInfo.startStation = startStation
+      this.bookTicketInfo.endStation = endStation
+      this.bookTicketInfo.trainNumber = trainNumber
     },
-    getAllBookLists () {
-      this.$http
-          .get('category/list/tree')
-          .then(response => {
-            if (response.status === 200) {
-              this.categoryList = response.data.data
-              console.log(parseInt(localStorage.active))
-            }
-          })
-          .catch(function (error) { // 请求失败处理
-            console.log(error);
-          });
+    // 支付
+    async bookTicket () {
+      if (this.bookTicketInfo.price === null) return this.$message.warning('请选择座位类型')
+      const { data:res } = await this.$http.get('/order/buyTicket',
+          {
+            params: this.bookTicketInfo
+          }
+      )
+      if  (res.code !== 200) return this.$message.error(res.error)
+      this.$message.success("支付成功！")
+      // 预订成功后，刷新剩余座位数
+      await this.handleQueryTrains()
+      this.bookDialogVisible = false
     },
-    getBooksById (Id,currPage) {
-      this.$http
-          .get('book/list',{
-            params: {
-              categoryId: Id,
-              limit: "8",
-              page: currPage
-            }
-          })
-          .then(response => {
-            if (response.status === 200) {
-              this.items = response.data.data
-            }
-          })
-          .catch(function (error) { // 请求失败处理
-            console.log(error);
-          });
+    handleSizeChange () {
+    },
+    handleCurrentChange () {
+    },
+    // 订票dialog关闭的回调函数
+    editUserDialogClosed () {
+
+    },
+    // 顾客选择对应座位后，将座位名称赋予查询对象
+    changeSeatType (price) {
+      this.bookTicketInfo.seatType = this.seatInfo.find( (item) => {
+         return item.price === price
+      }).title
     }
+
   },
   filters: {
     timeFormat(timeStr) {
@@ -125,127 +252,47 @@ export default {
     }
   },
   created() {
-    this.getAllBookLists()
-    this.getBooksById(0,1)
+    this.getAllTrainNums()
   }
 }
 </script>
 
 <style scoped lang="less">
-* {
-  padding: 0;
-  margin: 0;
-}
 ul {
   list-style: none;
 }
 a {
   text-decoration: none;
 }
-.el-aside {
-  text-align: center;
-  height: 630px;
-  position: relative;
-}
+//main部分开始
 .el-main {
   text-align: left;
   flex-wrap: wrap;
   align-items: center;
   width: 100%;
-  height: 632px;
-}
-
-//侧边导航栏开始
-.tac {
-  text-align: left;
-}
-.el-menu {
-  border: 1px solid #dddddd;
-}
-.el-submenu {
-  border-bottom: 1px solid #dddddd;
-  background-color: #dff0d8;
-}
-.el-menu-item {
-  border-bottom: 1px solid #dddddd;
-  min-width: 195px;
-}
-.el-menu-item-group__title {
   padding: 0;
+  .box-card {
+    background-color: #eef1f8;
+  }
+  .sear-box {
+    padding-top: 20px;
+    .btn-contain {
+      display: flex;
+      justify-content: center;
+    }
+  }
+  .list-box {
+    padding-top: 20px;
+    .box-card2 {
+      margin-bottom: 100px;
+    }
+  }
 }
-.el-submenu:last-child {
-  border-bottom: none;
-}
-.stepBar {
-  font-size: 14px;
-  position: absolute;
-  bottom: 10px;
-}
-//侧栏结束
-//main部分开始
-.el-main {
-  background-color: #f8f8f8;
-  font-family: 'Helvetica Neue', 'Helvetica', 'Microsoft Yahei', sans-serif;
-  border: 1px solid #dddddd;
-  border-radius: 20px;
-}
-.view_area {
-  width: 1080px;
-  height: 100%;
-  margin: 0 auto;
-  padding-left: -30px;
-}
-.showDiv {
-  width: 234px;
-  height: 300px;
-  float: left;
-  margin-left: 30px;
-  margin-top: 15px;
-  opacity: 100%;
-  flex: 1;
-}
-.showBox {
-  width: 234px;
-  height: 295px;
-  background-color: #fff;
-  text-align: center;
-  border-radius: 20px;
-  transition: all .2s linear;
-  margin-top: 5px;
-}
-.showBox:hover {
-  margin-top: 0;
-  box-shadow: 0 8px 16px rgba(100,100,100,.18);
-}
-.showBox img {
-  width: 155px;
-  height: 155px;
-  margin: 20px auto 18px;
-}
-h4.book_title {
-  margin: 0 20px 3px;
-  font-size: 14px;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  font-weight: 400;
-  color: #212121;
-  white-space: nowrap;
-}
-p.book_price {
-  color: #ff6709;
-  font-size: 14px;
-}
-p {
-  font-size: 12px;
-  color: #b0b0b0;
-}
-//分页导航部分开始
-.el-pagination {
-  position: fixed;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
+// 控制dialog的样式
+.el-dialog {
+  .el-input {
+    width: 190px;
+  }
 }
 //main部分结束
 </style>
-
