@@ -59,7 +59,7 @@
                   @fail="handleError"
               ></vab-verify>
             </div>
-            <el-button :loading="loading" type="primary" class="login-btn"  size="medium" slot="reference" @click="handleLogin">
+            <el-button :loading="loading" type="primary" class="login-btn"  size="medium" slot="reference" @click.prevent="handleLogin">
               登录
             </el-button>
 

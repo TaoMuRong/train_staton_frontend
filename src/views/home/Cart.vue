@@ -27,6 +27,7 @@
           <el-form-item label="电话号码" prop="tel">
             <el-input v-model="userInfo.tel"></el-input>
           </el-form-item>
+          <el-divider></el-divider>
           <el-row :gutter="20">
             <el-col :span="4" :offset="6">
               <el-button type="primary" @click="modifyUserInfo">保存修改</el-button>

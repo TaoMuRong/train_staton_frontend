@@ -35,8 +35,6 @@
             个人信息
           </div>
         </div>
-
-
         <!-- 头部右边 -->
         <div class="header-right">
           <div class="header-search-wrap">
@@ -334,7 +332,6 @@ export default {
       .header-search-wrap {
         flex: 2;
         .center;
-
       }
       .user-info {
         flex: 1;
@@ -343,6 +340,7 @@ export default {
           .hover-style;
         }
         .el-dropdown-link {
+          color: #FFFFFF;
           display: block;
           width: 100%;
           height: 100%;

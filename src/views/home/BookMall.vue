@@ -7,7 +7,7 @@
           <el-card class="box-card">
             <el-row type="flex" class="row-bg" justify="space-around">
               <el-col :span="6">
-                  <el-select v-model="stationInfo.startStation" filterable placeholder="始发站">
+                  <el-select v-model="stationInfo.startStation" filterable placeholder="出发地">
                   <el-option
                       v-for="item in options"
                       :key="item.value"
@@ -17,7 +17,7 @@
                 </el-select>
               </el-col>
               <el-col :span="6">
-                <el-select v-model="stationInfo.endStation" filterable placeholder="始发站">
+                <el-select v-model="stationInfo.endStation" filterable placeholder="目的地">
                   <el-option
                       v-for="item in options"
                       :key="item.value"
@@ -42,39 +42,22 @@
                 <el-table :data="trainNumbers" border stripe v-loading="loading">
                   <el-table-column type="expand" >
                     <template slot-scope="props">
-                      <el-table
-                          :data="props.row.parkStationList"
-                          style="width: 100%">
-                        <el-table-column type="index" label="#"></el-table-column>
-                        <el-table-column
-                            prop="stationName"
-                            label="经停站"
-                            width="180">
-                        </el-table-column>
-                        <el-table-column
-                            prop="arriveTime"
-                            label="到站时间"
-                            width="180">
-                        </el-table-column>
-                        <el-table-column
-                            prop="startTime"
-                            label="发车时间">
-                        </el-table-column>
-                        <el-table-column
-                            prop="parkingTime"
-                            label="停车时间">
-                        </el-table-column>
-                      </el-table>
+                      <span style="display:block; marginBottom: 10px;">该车次所有经停站及到达/出发时间：</span>
+                      <el-steps :active="props.row.parkStationList.length">
+                        <el-step
+                            v-for="(station, index) in props.row.parkStationList"
+                            :key="index"
+                            :title="station.stationName"
+                            :description="`${station.arriveTime} / ${station.startTime}`"></el-step>
+                      </el-steps>
                     </template>
                   </el-table-column>
                   <el-table-column prop="trainNumber" label="车次">
                   </el-table-column>
-                  <el-table-column prop="startStation" label="出发站"></el-table-column>
-                  <el-table-column prop="endStation" label="到达站"></el-table-column>
-                  <el-table-column prop="arriveTime" label="到站时间"></el-table-column>
+                  <el-table-column prop="startStation" label="出发地"></el-table-column>
+                  <el-table-column prop="endStation" label="目的地"></el-table-column>
                   <el-table-column prop="arriveTime" label="到站时间"></el-table-column>
                   <el-table-column prop="startTime" label="发车时间"></el-table-column>
-                  <el-table-column prop="distance" label="距离"></el-table-column>
                   <el-table-column prop="runningTime" label="历时"></el-table-column>
                   <el-table-column prop="firstSeat" label="一等座"></el-table-column>
                   <el-table-column prop="secondSeat" label="二等座"></el-table-column>
@@ -228,11 +211,10 @@ export default {
       this.bookTicketInfo.startStation = startStation
       this.bookTicketInfo.endStation = endStation
       this.bookTicketInfo.trainNumber = trainNumber
-      // 预订成功后，刷新剩余座位数
-      await this.handleQueryTrains()
     },
     // 支付
     async bookTicket () {
+      if (this.bookTicketInfo.price === null) return this.$message.warning('请选择座位类型')
       const { data:res } = await this.$http.get('/order/buyTicket',
           {
             params: this.bookTicketInfo
@@ -240,6 +222,8 @@ export default {
       )
       if  (res.code !== 200) return this.$message.error(res.error)
       this.$message.success("支付成功！")
+      // 预订成功后，刷新剩余座位数
+      await this.handleQueryTrains()
       this.bookDialogVisible = false
     },
     handleSizeChange () {

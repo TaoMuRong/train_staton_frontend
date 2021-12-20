@@ -23,6 +23,16 @@
             </template>
           </el-table-column>
         </el-table>
+<!--        放置分页-->
+        <!--      放置分页-->
+        <el-pagination
+            @current-change="handleCurrentChange"
+            :current-page="queryInfo.currentPage"
+            :page-sizes="[5]"
+            :page-size="queryInfo.pagesize"
+            layout="total, sizes, prev, pager, next, jumper"
+            :total="ordersList.length">
+        </el-pagination>
       </el-card>
     </div>
 <!--    订单主体部分结束-->
@@ -42,7 +52,11 @@ export default {
       // 保存分页信息
       queryInfo: {
         // 页数
-        currentPage: 0
+        pageSize: 5,
+        // 当前页
+        currentPage: 1,
+        // 自定义的记录数
+        totalOrders: 20
       }
     }
   },
@@ -50,7 +64,7 @@ export default {
     async getOrdersList () {
       this.loading = true
       const { data:res } = await this.$http.get('/user/queryOrder',{
-        params: this.queryInfo
+        params: this.queryInfo.currentPage
       })
       if (res.code !== 200) return this.$message.error(res.error)
       this.ordersList = res.data
@@ -72,6 +86,11 @@ export default {
       if (res.code !== 200) return this.$message.error(res.error)
       this.$message.success('退票成功')
       this.getOrdersList()
+    },
+    // 当前页改变的回调函数
+    async handleCurrentChange (newNum) {
+      this.queryInfo.currentPage = newNum
+      await this.getOrdersList()
     }
   },
   created() {

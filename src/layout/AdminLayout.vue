@@ -2,7 +2,7 @@
   <div id="admin-container">
     <el-container>
       <el-aside width="200px">
-        <header>BookCity</header>
+        <header>HUBU12305</header>
         <div class="divider"></div>
         <div class="admin-info-wrap">
           <img
@@ -29,15 +29,9 @@
               >
                 <i class="el-icon-menu" v-if="item.name === '经停站管理'"></i>
                 <i
-                    class="el-icon-collection"
+                    class="el-icon-menu"
                     v-else-if="item.name === '车次管理'"
                 ></i>
-                <i class="el-icon-folder" v-else-if="item.name === '文件管理'"></i>
-                <i class="el-icon-s-data" v-else-if="item.name === '销量统计'"></i>
-                <i class="el-icon-collection" v-else-if="item.name === '申请入库'"></i>
-                <i class="el-icon-thumb" v-else-if="item.name === '拾取任务'"></i>
-                <i class="el-icon-tickets" v-else-if="item.name === '待办事项'"></i>
-                <i class="el-icon-document-checked" v-else-if="item.name === '申请记录'"></i>
                 <span>{{ item.name }}</span>
               </el-menu-item>
             </el-menu-item-group>
@@ -48,7 +42,7 @@
           <div class="header-part">
             <div class="to-book-mall" @click="goToBookMall">
               <i class="el-icon-position"></i>
-              <span>书城首页</span>
+              <span>购票首页</span>
             </div>
             <el-dropdown class="admin-settings">
               <span class="el-dropdown-link">
@@ -65,7 +59,6 @@
             </el-dropdown>
           </div>
         </el-header>
-
         <el-main>
           <span>{{ currPageName }}</span>
           <el-divider></el-divider>
@@ -73,7 +66,6 @@
         </el-main>
       </el-container>
     </el-container>
-
     <!-- 修改密码登录框 -->
     <el-dialog
       title="修改密码"
@@ -137,43 +129,13 @@ export default {
       menuList: [
         {
           id: "1",
-          name: "销量统计",
-          path: "/admin/sales_statistics"
-        },
-        {
-          id: "2",
           name: "经停站管理",
           path: "/admin/station_management",
         },
         {
-          id: "3",
+          id: "2",
           name: "车次管理",
           path: "/admin/train_management",
-        },
-         {
-          id: "4",
-          name: "文件管理",
-          path: "/admin/file_management",
-        },
-        {
-          id: "5",
-          name: "申请入库",
-          path: "/admin/apply_for_storage",
-        },
-        {
-          id: "6",
-          name: "拾取任务",
-          path: "/admin/pickup_task",
-        },
-        {
-          id: "7",
-          name: "待办事项",
-          path: "/admin/my_to_do",
-        },
-        {
-          id: "8",
-          name: "申请记录",
-          path: "/admin/application_record",
         }
       ],
       currPageName: "",
@@ -217,10 +179,15 @@ export default {
     },
     async logout() {
       try {
-        const { data } = await this.$http.post("/member/logout");
+        const { data } = await this.$http.get("/user/logout");
+        console.log(data)
         if (data.success) {
+          console.log(data)
+          window.sessionStorage.clear()
           this.$store.commit("REMOVE_ROLE");
-          this.$router.replace({ name: "login" });
+          this.$router.replace({
+            name: "login",
+          });
         } else {
           this.$message({
             type: "error",
@@ -294,6 +261,7 @@ export default {
 #admin-container {
   height: 100%;
   font-family: "微软雅黑";
+  background-color: #fff;
   .el-container {
     .divider {
       background-color: #454d55;
