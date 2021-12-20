@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div id="home">
     <el-container>
       <!-- 头部 -->
       <el-header>
@@ -18,23 +18,24 @@
           </div>
           <div
             :class="[
-              currRouteName === 'cart' ? 'header-active' : 'header-inactive',
+              currRouteName === 'order' ? 'header-active' : 'header-inactive',
               'my-cart',
             ]"
-            @click="handleHeaderClick('cart')"
+            @click="handleHeaderClick('order')"
           >
             订单
           </div>
           <div
             :class="[
-              currRouteName === 'order' ? 'header-active' : 'header-inactive',
+              currRouteName === 'cart' ? 'header-active' : 'header-inactive',
               'my-order',
             ]"
-            @click="handleHeaderClick('order')"
+            @click="handleHeaderClick('cart')"
           >
             个人信息
           </div>
         </div>
+
 
         <!-- 头部右边 -->
         <div class="header-right">
@@ -42,6 +43,7 @@
             <el-autocomplete
               class="search-input"
               v-model="searchVal"
+              size="small"
               :fetch-suggestions="querySearch"
               placeholder="请输入内容"
               @select="handleSearchSelect"
@@ -75,10 +77,7 @@
       </el-header>
       <el-main><router-view></router-view></el-main>
     </el-container>
-
-
     <!-- 修改密码登录框 -->
-
     <el-dialog
       title="修改密码"
       :visible.sync="changePasswordDialogVis"
@@ -175,7 +174,6 @@ export default {
 
     async logout() {
       try {
-        console.log("???")
         const { data } = await this.$http.get("/user/logout");
         console.log(data)
         if (data.success) {
@@ -199,10 +197,6 @@ export default {
           duration: 1500,
         });
       }
-      // window.sessionStorage.clear();
-      // this.$router.replace({
-      //   name: "login",
-      // });
     },
 
     goAdminStage() {
@@ -220,10 +214,9 @@ export default {
       this.$refs["changeInfoForm"].validate(async (valid) => {
         if (valid) {
           try {
-            const { data } = await this.$http.post("/member/update", {
-              id: localStorage.accountId,
-              oldPassword: this.changeInfo.oldPassword,
-              newPassword: this.changeInfo.newPassword,
+            const { data } = await this.$http.post("/user/modifyPassword", {
+              pwd: this.changeInfo.newPassword,
+              userName: window.localStorage.getItem('username')
             });
             console.log(data);
             if (data.success) {
@@ -278,54 +271,47 @@ export default {
 </script>
 
 <style scoped lang="less">
+#home {
+  background-color: #f5f5f5;
+}
 .header-active {
-  font-size: 16px;
-  font-weight: normal;
-  color: #39d7da;
+  background-color: #2676e3;
 }
-.header-inactive {
-  font-weight: lighter;
-  font-size: 14px;
-}
-
 .center() {
   display: flex;
   justify-content: center;
   align-items: center;
 }
 .hover-style() {
-  color: #39d7da;
+  background-color: #3685EC;
   cursor: pointer;
 }
-
 .el-container {
-  margin-left: 2%;
-  margin-right: 2%;
+  margin-left: 10%;
+  margin-right: 10%;
   .el-header {
-    background-color: #f8f8f8;
+    background-color: #409EFF;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-radius: 5px;
-    font-family: "微软雅黑";
-    height: 60px;
+    height: 46px !important;
+    padding: 0;
     .header-left {
       display: flex;
       width: 30%;
       height: 100%;
+      color: #FFFFFF;
       .book-mall-logo,
       .my-cart,
       .my-order {
         &:hover {
-          font-size: 16px;
-          font-weight: normal;
           .hover-style;
         }
         flex: 1;
         width: 100%;
         height: 100%;
         text-align: center;
-        line-height: 60px;
+        line-height: 46px;
       }
     }
     .header-center {
@@ -344,9 +330,11 @@ export default {
       justify-content: space-between;
       font-size: 14px;
       height: 100%;
+      color: #FFFFFF;
       .header-search-wrap {
         flex: 2;
         .center;
+
       }
       .user-info {
         flex: 1;
@@ -370,6 +358,9 @@ export default {
         }
       }
     }
+  }
+  .el-main {
+    padding: 0;
   }
 }
 </style>
