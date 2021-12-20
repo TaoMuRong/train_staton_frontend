@@ -42,7 +42,7 @@
             <el-form-item label="历时">
               <span>{{ props.row.runningTime + " 分钟"}}</span>
             </el-form-item>
-            <el-form-item label="与前站相隔">
+            <el-form-item label="与首站相距">
               <span>{{ props.row.startStationDistance + " 公里"}}</span>
             </el-form-item>
           </el-form>
@@ -95,14 +95,14 @@
       <el-form
         :model="trainInfo"
         class="train-form"
-        label-width="120px"
+        label-width="130px"
         label-position="left"
         size="medium"
         hide-required-asterisk
       >
-        <el-form-item label="列车编号" prop="stationNo">
+        <el-form-item label="列车编号" prop="trainNo">
           <el-input
-            v-model="trainInfo.stationNo"
+            v-model="trainInfo.trainNo"
             autocomplete="off"
           ></el-input>
         </el-form-item>
@@ -112,9 +112,15 @@
             autocomplete="off"
           ></el-input>
         </el-form-item>
-        <el-form-item label="站点编号" prop="trainNo">
+        <el-form-item label="站点编号" prop="stationNo">
           <el-input
-            v-model="trainInfo.trainNo"
+            v-model="trainInfo.stationNo"
+            autocomplete="off"
+          ></el-input>
+        </el-form-item>
+         <el-form-item label="站点名称" prop="stationName">
+          <el-input
+            v-model="trainInfo.stationName"
             autocomplete="off"
           ></el-input>
         </el-form-item>
@@ -130,13 +136,13 @@
             autocomplete="off"
           ></el-input>
         </el-form-item>
-        <el-form-item label="历时" prop="runningTime">
+        <el-form-item label="历时(分)" prop="runningTime">
           <el-input
             v-model="trainInfo.runningTime"
             autocomplete="off"
           ></el-input>
         </el-form-item>
-        <el-form-item label="与前站相隔" prop="startStationDistance">
+        <el-form-item label="与首站相距（km）" prop="startStationDistance">
           <el-input
             v-model="trainInfo.startStationDistance"
             autocomplete="off"
@@ -158,48 +164,54 @@
       <el-form
         :model="addTrainInfo"
         class="train-form"
-        label-width="120px"
+        label-width="130px"
         label-position="left"
         size="medium"
         hide-required-asterisk
       >
-        <el-form-item label="列车编号" prop="stationNo1">
-          <el-input
-            v-model="addTrainInfo.stationNo"
-            autocomplete="off"
-          ></el-input>
-        </el-form-item>
-        <el-form-item label="车次" prop="trainNumber1">
-          <el-input
-            v-model="addTrainInfo.trainNumber"
-            autocomplete="off"
-          ></el-input>
-        </el-form-item>
-        <el-form-item label="站点编号" prop="trainNo1">
+        <el-form-item label="列车编号" prop="trainNo">
           <el-input
             v-model="addTrainInfo.trainNo"
             autocomplete="off"
           ></el-input>
         </el-form-item>
-        <el-form-item label="到达时间" prop="arriveTime1">
+        <el-form-item label="车次" prop="trainNumber">
+          <el-input
+            v-model="addTrainInfo.trainNumber"
+            autocomplete="off"
+          ></el-input>
+        </el-form-item>
+        <el-form-item label="站点编号" prop="stationNo">
+          <el-input
+            v-model="addTrainInfo.stationNo"
+            autocomplete="off"
+          ></el-input>
+        </el-form-item>
+         <el-form-item label="站点名称" prop="stationName">
+          <el-input
+            v-model="addTrainInfo.stationName"
+            autocomplete="off"
+          ></el-input>
+        </el-form-item>
+        <el-form-item label="到达时间" prop="arriveTime">
           <el-input
             v-model="addTrainInfo.arriveTime"
             autocomplete="off"
           ></el-input>
         </el-form-item>
-        <el-form-item label="出发时间" prop="startTime1">
+        <el-form-item label="出发时间" prop="startTime">
           <el-input
             v-model="addTrainInfo.startTime"
             autocomplete="off"
           ></el-input>
         </el-form-item>
-        <el-form-item label="历时" prop="runningTime1">
+        <el-form-item label="历时(分)" prop="runningTime">
           <el-input
             v-model="addTrainInfo.runningTime"
             autocomplete="off"
           ></el-input>
         </el-form-item>
-        <el-form-item label="与前站相隔" prop="startStationDistance1">
+        <el-form-item label="与首站相距（km）" prop="startStationDistance">
           <el-input
             v-model="addTrainInfo.startStationDistance"
             autocomplete="off"
@@ -225,7 +237,16 @@ export default {
       infoDialogVis: false,
       addDialogVis: false,
       trainInfo: {},
-      addTrainInfo: {},
+      addTrainInfo: {
+        arriveTime: "",
+        runningTime: null,
+        startStationDistance: null,
+        startTime: "",
+        stationName: "",
+        stationNo: "",
+        trainNo: "",
+        trainNumber: ""
+      },
       trainId: "",
       currentPage: 1
     }
@@ -253,6 +274,7 @@ export default {
     async getInfo () {
       // 获取全部车次
       var allTrains = []
+      this.loading = true
       await this.$http
           .get('/train/queryAllTrainNoPage')
           .then(response => {
@@ -270,6 +292,8 @@ export default {
       for(let i = 0; i < allTrains.length; i++) {
         this.getOneTrain(allTrains[i])
       }
+      this.loading = false
+      
     },
 
     // 打开修改经停站对话框并传递选中经停站信息
@@ -284,9 +308,9 @@ export default {
     },
     
     // 删除经停站
-    deleteStation(info) {
-      this.$http
-        .post('/admin/deleteParkStation',{ trainNumber: info.trainNumber, stationName:info.stationName } )
+    async deleteStation(info) {
+      await this.$http
+        .post('/admin/deleteParkStation?trainNumber=' + info.trainNumber + '&stationName=' + info.stationName )
         .then(response => {
           if (response.status === 200) {
             this.$message({
@@ -296,6 +320,7 @@ export default {
             duration: 1500,
           });
           }
+          
         })
         .catch(function (error) {
           this.$message({
@@ -305,13 +330,18 @@ export default {
             duration: 1500,
           });
         });
+      // 这里利用filter()函数完成表格刷新，效果最好
+      this.tableData = this.tableData.filter(o => {
+        return (o.stationName != info.stationName || o.trainNumber != info.trainNumber)
+      })
+      
     },
 
     // 确认修改经停站信息
-    handleDialogConfirm() {
-      this.$http
+    async handleDialogConfirm() {
+      await this.$http
         .post('/admin/updateParkStation', this.trainInfo)
-        .then(response => {
+        .then(response =>  {
           if (response.status === 200) {
             this.$message({
             message: "编辑成功!",
@@ -320,6 +350,7 @@ export default {
             duration: 1500,
           });
           }
+          this.infoDialogVis = false
         })
         .catch(function (error) {
           console.log(error)
@@ -333,11 +364,10 @@ export default {
     },
 
     // 确认添加经停站
-    handleAddDialogConfirm() {
-      this.$http
+    async handleAddDialogConfirm() {
+      await this.$http
         .post('/admin/saveParkStation', this.addTrainInfo)
         .then(response => {
-          console.log(response)
           if (response.status === 200) {
             this.$message({
             message: "增加成功!",
@@ -346,6 +376,8 @@ export default {
             duration: 1500,
           });
           }
+          this.addDialogVis = false
+          this.getInfo()
         })
         .catch(function (error) {
           console.log(error)
@@ -360,12 +392,12 @@ export default {
 
     // 取消修改经停站，关闭对话框
     handleDialogCancel() {
-      this.infoDialogVis = false;
+      this.infoDialogVis = false
     },
 
     // 取消添加经停站，关闭对话框
     handleAddDialogCancel() {
-      this.addDialogVis = false;
+      this.addDialogVis = false
     },
 
     // 查询对应车次下所有经停站
@@ -375,9 +407,9 @@ export default {
     },
 
   },
+
   async created() {
-      await this.getInfo()
-      this.loading = false
+    this.getInfo()
   }
 }
 </script>

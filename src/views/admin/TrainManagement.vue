@@ -155,7 +155,7 @@
       </el-table-column>
       <el-table-column type="expand">
         <template slot-scope="props">
-          <span style="display:block; marginBottom: 10px;">该车次所有经停站及到达/出发时间：</span>
+          <span style="display:block; marginBottom: 10px;">该车次所有经停站及到站/出站时间：</span>
           <el-steps :active="props.row.allStations.length">
             <el-step
             v-for="(station, index) in props.row.allStations"
@@ -181,13 +181,21 @@
         label="终点站"
         prop="endStation">
       </el-table-column>
+      <el-table-column
+        label="出发时间"
+        prop="trainStartTime">
+      </el-table-column>
+      <el-table-column
+        label="到达时间"
+        prop="trainEndTime">
+      </el-table-column>
       <el-table-column label="操作" width="150">
         <template slot-scope="scope">
           <el-button
             size="mini"
             @click="editTrain(scope.row)">编辑</el-button>
           <el-popconfirm
-            title="确定删除此车次吗？"
+            title="确定停用此车次吗？"
             icon="el-icon-warning"
             icon-color="red"
             @confirm="deleteTrain(scope.row)"
@@ -196,7 +204,7 @@
             slot="reference"
             size="mini"
             type="danger"
-            style="marginLeft: 10px;">删除</el-button>
+            style="marginLeft: 10px;">停用</el-button>
           </el-popconfirm>
         </template>
       </el-table-column>
@@ -204,7 +212,7 @@
 
     <div style="margin-top: 20px">
       <el-popconfirm
-            title="确认删除选中车次？"
+            title="确认停用选中车次？"
             icon="el-icon-warning"
             icon-color="red"
             @confirm="deleteTrains()"
@@ -229,8 +237,8 @@ export default {
       infoDialogVis: false,
       loading: true,
       trainInfo: {
-        stop: true,
-        trainCarriages: 50,
+        stop: false,
+        trainCarriages: null,
         trainEndStation: "",
         trainEndTime: "",
         trainNo: "",
@@ -239,7 +247,7 @@ export default {
         trainStartTime: ""
       },
       addTrainInfo: {
-        stop: true,
+        stop: false,
         trainCarriages: null,
         trainEndStation: "",
         trainEndTime: "",
@@ -252,29 +260,23 @@ export default {
     };
   },
   methods: {
-    // 获取单个车次的相关信息
+    // 获取单个车次的相关信息，不要用forEach
     getOneTrain(trainNum) {   
       this.$http
         .get('/admin/queryParkStationByTrainNumber', { params: { trainNumber: trainNum } })
         .then(response => {
           if (response.data.success) {
             const { data } = response.data
-            // 记录一个车次起始站的相关信息，以及经过的所有站点（allStations）
-            let trainStations = {
-              trainNo: "",
-              trainNumber: "",
-              startStation: "",
-              endStation: "",
-              allStations: []
-            }
-            trainStations.trainNo = data[0].trainNo
-            trainStations.trainNumber = data[0].trainNumber
-            trainStations.startStation = data[0].stationName
-            trainStations.endStation = data[data.length - 1].stationName
+            let stations = []
             for(let i = 0; i < data.length; i++) {
-              trainStations.allStations.push(data[i])
+              stations.push(data[i])
             }
-            this.tableData.push(trainStations)
+            for(let i = 0; i < this.tableData.length; i++) {
+              if(this.tableData[i].trainNumber === trainNum){
+                this.tableData[i]["allStations"] = stations
+                 data.length > 0 ? this.tableData[i]["trainNo"] = data[0].trainNo : this.tableData[i]["trainNo"] = ""
+              }
+            }
           }
         })
         .catch(function (error) {
@@ -282,7 +284,7 @@ export default {
         });
     },
 
-    // 获取全部车次的详细信息
+    // 获取全部车次的详细信息，不要用forEach
     async getInfo () {
       // 获取全部车次
       var allTrains = []
@@ -290,15 +292,30 @@ export default {
           .get('/train/queryAllTrainNoPage')
           .then(response => {
             if (response.data.success) {
-              response.data.data.forEach(function(item) {
-                allTrains.push(item.trainNumber)
-              })
+              const { data } = response.data
+              for(let i = 0; i < data.length; i++) {
+                var trainStations = {
+                  trainNo: "",
+                  trainNumber: "",
+                  startStation: "",
+                  endStation: "",
+                  trainStartTime: "",
+                  trainEndTime: "",
+                  allStations: []
+                }
+                trainStations.trainNumber = data[i].trainNumber
+                trainStations.startStation = data[i].startStation
+                trainStations.endStation = data[i].endStation
+                trainStations.trainStartTime = data[i].startTime
+                trainStations.trainEndTime = data[i].endTime
+                this.tableData.push(trainStations)
+                allTrains.push(data[i].trainNumber)
+              }
             }
           })
           .catch(function (error) {
             console.log(error);
           });
-
       // 循环将所有车次详细信息push到tableData
       for(let i = 0; i < allTrains.length; i++) {
         this.getOneTrain(allTrains[i])
@@ -327,23 +344,24 @@ export default {
             duration: 1500,
           });
         });
+      // 这里利用filter()函数完成表格刷新，效果最好
+      this.tableData = this.tableData.filter(o => {
+        return o.trainNo != info.trainNo
+      })
     },
     
     // 传递选中的车次信息到表单
     editTrain(info) {
       this.infoDialogVis = true;
-      this.trainInfo.trainNumber = info.trainNumber
-      this.trainInfo.trainNo = info.trainNo
+      this.trainInfo = info
       this.trainInfo.trainStartStation = info.startStation
       this.trainInfo.trainEndStation = info.endStation
-      this.trainInfo.trainStartTime = info.allStations[0].arriveTime
-      this.trainInfo.trainEndTime = info.allStations[info.allStations.length - 1].arriveTime
     },
 
     // 确认修改车次
     handleDialogConfirm() {
       this.$http
-        .post('/admin/updateParkStation', this.trainInfo)
+        .post('/admin/updateTrain', this.trainInfo)
         .then(response => {
           if (response.status === 200) {
             this.$message({
@@ -353,6 +371,7 @@ export default {
             duration: 1500,
           });
           }
+          this.infoDialogVis = false
         })
         .catch(function (error) {
           console.log(error)
@@ -394,6 +413,8 @@ export default {
             duration: 1500,
           });
           }
+          this.addDialogVis = false
+          this.getInfo()
         })
         .catch(function (error) {
           console.log(error)
@@ -413,20 +434,31 @@ export default {
 
     // 查询车次
     onSubmit() {
-      this.tableData.splice(0,this.tableData.length)
-      this.getOneTrain(this.trainId)
+      for(let i = 0; i < this.tableData.length; i++) {
+        if(this.tableData[i].trainNumber === this.trainId){
+          let selectedTrain = this.tableData[i]
+          this.tableData.splice(0,this.tableData.length)
+          this.tableData.push(selectedTrain)
+          break
+        }
+      }
     },
 
     // 批量删除车次
     deleteTrains() {
       // 收集所有需要删除车次的id并作为参数传入
-      var deleteIds = []
-      this.multipleSelection.forEach(function(item) {
-        deleteIds.push(item.trainNo)
+      var deleteIds = ""
+      var deleteIdsArray = [] 
+      this.multipleSelection.forEach(function(item,index) {
+        deleteIdsArray.push(item.trainNumber)
+        if(index > 0)
+          deleteIds += "&ids=" + item.trainNo
+        else
+          deleteIds += "ids=" + item.trainNo
       })
 
       this.$http
-        .get('/admin/deletedByIds',{ params: { ids: deleteIds } })
+        .get('/admin/deletedByIds?' + deleteIds)
         .then(response => {
           if (response.status === 200) {
             this.$message({
@@ -445,6 +477,9 @@ export default {
             duration: 1500,
           });
         });
+      this.tableData = this.tableData.filter(o => {
+        return !(deleteIdsArray.includes(o.trainNumber))
+      })
     }
 
   },

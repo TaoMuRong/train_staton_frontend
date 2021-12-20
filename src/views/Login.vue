@@ -13,8 +13,8 @@
     <div class="login">
       <div class="login-slide">
         <el-image
-          style="height: 600px"
-          src="https://www.12306.cn/index/images/pic/banner-login-20200924.jpg"
+          style="height: 600px;width: 100%;"
+          :src="backgroundImgUrl"
           fit="cover">
         </el-image>
       </div>
@@ -226,6 +226,7 @@ export default {
     };
 
     return {
+      backgroundImgUrl: require('@/assets/image/train.jpeg'),
       text: "向右滑动",
       loading:false,
       VabVerifyVis:false,
