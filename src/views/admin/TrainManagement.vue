@@ -148,7 +148,7 @@
     v-loading="loading"
     :data="tableData"
     :default-sort = "{prop: 'trainNumber', order: 'ascending'}"
-    style="width: 100%">
+    style="width: 100%;fontSize: 14px;">
       <el-table-column
       type="selection"
       width="55">

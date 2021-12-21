@@ -17,7 +17,7 @@
     v-loading="loading"
     :data="tableData"
     :default-sort = "{prop: 'trainNumber', order: 'ascending'}"
-    style="width: 100%">
+    style="width: 100%;fontSize: 14px;">
       <el-table-column type="expand">
         <template slot-scope="props">
           <el-form label-position="left" inline class="trainManager_expand">
@@ -170,15 +170,20 @@
         hide-required-asterisk
       >
         <el-form-item label="列车编号" prop="trainNo">
-          <el-input
-            v-model="addTrainInfo.trainNo"
-            autocomplete="off"
-          ></el-input>
+          <el-select v-model="selectedTrain" value-key="trainNo" placeholder="请选择">
+            <el-option
+              v-for="item in trainsArray"
+              :key="item.trainNo"
+              :label="item.trainNo"
+              :value="item">
+            </el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="车次" prop="trainNumber">
           <el-input
             v-model="addTrainInfo.trainNumber"
             autocomplete="off"
+            :disabled="true"
           ></el-input>
         </el-form-item>
         <el-form-item label="站点编号" prop="stationNo">
@@ -232,6 +237,11 @@
 export default {
   data() {
     return {
+      trainsArray: [],
+      selectedTrain: {
+        trainNo: '',
+        trainNumber: ''
+      },
       loading: true,
       tableData: [],
       infoDialogVis: false,
@@ -247,16 +257,26 @@ export default {
         trainNo: "",
         trainNumber: ""
       },
-      trainId: "",
-      currentPage: 1
+      trainId: ""
+    }
+  },
+
+  watch: {
+    selectedTrain: function() {
+      for(let i = 0; i < this.trainsArray.length; i++) {
+        if(this.selectedTrain.trainNo === this.trainsArray[i].trainNo){
+          this.addTrainInfo.trainNo = this.selectedTrain.trainNo
+          this.addTrainInfo.trainNumber = this.selectedTrain.trainNumber
+        }
+      }
     }
   },
 
   methods: {
     // 将一个车次的所有数据添加到tableData，不能使用forEach
-    getOneTrain(trainNum) {   
+    getOneTrain(train) {   
       this.$http
-        .get('/admin/queryParkStationByTrainNumber', { params: { trainNumber: trainNum } })
+        .get('/admin/queryParkStationByTrainNumber', { params: { trainNumber: train.trainNumber } })
         .then(response => {
           if (response.data.success) {
             const { data } = response.data
@@ -275,26 +295,32 @@ export default {
       // 获取全部车次
       var allTrains = []
       this.tableData.splice(0,this.tableData.length)
+      this.trainsArray.splice(0,this.trainsArray.length)
       this.loading = true
       await this.$http
           .get('/train/queryAllTrainNoPage')
           .then(response => {
             if (response.data.success) {
               response.data.data.forEach(function(item) {
-                allTrains.push(item.trainNumber)
+                let train = {
+                  trainNo: '',
+                  trainNumber: ''
+                }
+                train.trainNo = item.trainNo
+                train.trainNumber = item.trainNumber
+                allTrains.push(train)
               })
             }
           })
           .catch(function (error) {
             console.log(error);
           });
-
       // 循环将所有车次详细信息push到tableData
       for(let i = 0; i < allTrains.length; i++) {
         this.getOneTrain(allTrains[i])
+        this.trainsArray.push(allTrains[i])
       }
       this.loading = false
-      
     },
 
     // 打开修改经停站对话框并传递选中经停站信息
