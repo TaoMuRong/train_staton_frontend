@@ -42,8 +42,8 @@
             <el-form-item label="历时">
               <span>{{ props.row.runningTime + " 分钟"}}</span>
             </el-form-item>
-            <el-form-item label="与首站相距">
-              <span>{{ props.row.startStationDistance + " 公里"}}</span>
+            <el-form-item label="已经过">
+              <span>{{ props.row.startStationDistance + " 站"}}</span>
             </el-form-item>
           </el-form>
         </template>
@@ -142,7 +142,7 @@
             autocomplete="off"
           ></el-input>
         </el-form-item>
-        <el-form-item label="与首站相距(km)" prop="startStationDistance">
+        <el-form-item label="与首站相距(站)" prop="startStationDistance">
           <el-input
             v-model="trainInfo.startStationDistance"
             autocomplete="off"
@@ -211,7 +211,7 @@
             autocomplete="off"
           ></el-input>
         </el-form-item>
-        <el-form-item label="与首站相距(km)" prop="startStationDistance">
+        <el-form-item label="与首站相距(站)" prop="startStationDistance">
           <el-input
             v-model="addTrainInfo.startStationDistance"
             autocomplete="off"
