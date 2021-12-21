@@ -62,7 +62,7 @@
             autocomplete="off"
           ></el-input>
         </el-form-item>
-        <el-form-item label="核载人数" prop="trainCarriages">
+        <el-form-item label="车厢总数" prop="trainCarriages">
           <el-input
             v-model="addTrainInfo.trainCarriages"
             autocomplete="off"
@@ -126,7 +126,7 @@
             autocomplete="off"
           ></el-input>
         </el-form-item>
-        <el-form-item label="核载人数" prop="trainCarriages">
+        <el-form-item label="车厢总数" prop="trainCarriages">
           <el-input
             v-model="trainInfo.trainCarriages"
             autocomplete="off"
@@ -193,7 +193,7 @@
         <template slot-scope="scope">
           <el-button
             size="mini"
-            @click="editTrain(scope.row)">编辑</el-button>
+            @click="editTrain(JSON.parse(JSON.stringify(scope.row)))">编辑</el-button>
           <el-popconfirm
             title="确定停用此车次吗？"
             icon="el-icon-warning"
@@ -221,7 +221,7 @@
             slot="reference"
             size="medium"
             type="danger"
-            style="marginLeft: 10px;">删除选中车次</el-button>
+            style="marginLeft: 10px;">停用选中车次</el-button>
           </el-popconfirm>
     </div>
   </div>

@@ -68,7 +68,7 @@
         <template slot-scope="scope">
           <el-button
             size="mini"
-            @click="editStation(scope.row)">编辑</el-button>
+            @click="editStation(JSON.parse(JSON.stringify(scope.row)))">编辑</el-button>
           <el-popconfirm
             title="确定删除此经停站吗？"
             icon="el-icon-warning"
