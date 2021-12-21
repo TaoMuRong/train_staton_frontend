@@ -102,7 +102,7 @@ const routes = [{
   {
     name: "admin",
     path: '/admin',
-    redirect: '/admin/sales_statistics',
+    redirect: '/admin/station_management',
     component: AdminLayout,
     meta: {
       roles: ['admin', 'finance']

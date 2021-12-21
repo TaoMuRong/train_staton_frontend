@@ -12,7 +12,7 @@
     </el-form>
 
     <el-table
-    height="470"
+    height="460"
     border
     v-loading="loading"
     :data="tableData"
@@ -142,7 +142,7 @@
             autocomplete="off"
           ></el-input>
         </el-form-item>
-        <el-form-item label="与首站相距（km）" prop="startStationDistance">
+        <el-form-item label="与首站相距(km)" prop="startStationDistance">
           <el-input
             v-model="trainInfo.startStationDistance"
             autocomplete="off"
@@ -211,7 +211,7 @@
             autocomplete="off"
           ></el-input>
         </el-form-item>
-        <el-form-item label="与首站相距（km）" prop="startStationDistance">
+        <el-form-item label="与首站相距(km)" prop="startStationDistance">
           <el-input
             v-model="addTrainInfo.startStationDistance"
             autocomplete="off"
@@ -274,6 +274,7 @@ export default {
     async getInfo () {
       // 获取全部车次
       var allTrains = []
+      this.tableData.splice(0,this.tableData.length)
       this.loading = true
       await this.$http
           .get('/train/queryAllTrainNoPage')
@@ -312,23 +313,25 @@ export default {
       await this.$http
         .post('/admin/deleteParkStation?trainNumber=' + info.trainNumber + '&stationName=' + info.stationName )
         .then(response => {
-          if (response.status === 200) {
+          if (response.data.success) {
             this.$message({
-            message: "删除成功!",
-            type: "success",
-            showClose: true,
-            duration: 1500,
-          });
+              message: "删除成功!",
+              type: "success",
+              showClose: true,
+              duration: 1500,
+            });
+          } else {
+            this.$message({
+              message: `删除失败!`,
+              type: "error",
+              showClose: true,
+              duration: 1500,
+            });
           }
           
         })
         .catch(function (error) {
-          this.$message({
-            message: `删除失败!${error}`,
-            type: "error",
-            showClose: true,
-            duration: 1500,
-          });
+          console.log(error)
         });
       // 这里利用filter()函数完成表格刷新，效果最好
       this.tableData = this.tableData.filter(o => {
@@ -342,24 +345,26 @@ export default {
       await this.$http
         .post('/admin/updateParkStation', this.trainInfo)
         .then(response =>  {
-          if (response.status === 200) {
+          if (response.data.success) {
             this.$message({
-            message: "编辑成功!",
-            type: "success",
-            showClose: true,
-            duration: 1500,
-          });
+              message: "编辑成功!",
+              type: "success",
+              showClose: true,
+              duration: 1500,
+            });
+            this.getInfo()
+            this.infoDialogVis = false
+          } else {
+            this.$message({
+              message: `编辑失败!`,
+              type: "error",
+              showClose: true,
+              duration: 1500,
+            });
           }
-          this.infoDialogVis = false
         })
         .catch(function (error) {
           console.log(error)
-          this.$message({
-            message: `编辑失败!`,
-            type: "error",
-            showClose: true,
-            duration: 1500,
-          });
         });
     },
 
@@ -368,25 +373,27 @@ export default {
       await this.$http
         .post('/admin/saveParkStation', this.addTrainInfo)
         .then(response => {
-          if (response.status === 200) {
+          if (response.data.success) {
             this.$message({
-            message: "增加成功!",
-            type: "success",
-            showClose: true,
-            duration: 1500,
-          });
+              message: "添加成功!",
+              type: "success",
+              showClose: true,
+              duration: 1500,
+            });
+            this.getInfo()
+            this.addDialogVis = false
+          } else {
+            this.$message({
+              message: `添加失败!`,
+              type: "error",
+              showClose: true,
+              duration: 1500,
+            });
           }
-          this.addDialogVis = false
-          this.getInfo()
+          
         })
         .catch(function (error) {
           console.log(error)
-          this.$message({
-            message: `增加失败!`,
-            type: "error",
-            showClose: true,
-            duration: 1500,
-          });
         });
     },
 

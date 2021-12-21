@@ -140,7 +140,7 @@
     </el-dialog>
 
     <el-table
-    height="420"
+    height="410"
     border
     ref="multipleTable"
     @selection-change="handleSelectionChange"
@@ -175,11 +175,11 @@
       </el-table-column>
       <el-table-column
         label="起始站"
-        prop="startStation">
+        prop="trainStartStation">
       </el-table-column>
       <el-table-column
         label="终点站"
-        prop="endStation">
+        prop="trainEndStation">
       </el-table-column>
       <el-table-column
         label="出发时间"
@@ -274,7 +274,6 @@ export default {
             for(let i = 0; i < this.tableData.length; i++) {
               if(this.tableData[i].trainNumber === trainNum){
                 this.tableData[i]["allStations"] = stations
-                 data.length > 0 ? this.tableData[i]["trainNo"] = data[0].trainNo : this.tableData[i]["trainNo"] = ""
               }
             }
           }
@@ -288,6 +287,7 @@ export default {
     async getInfo () {
       // 获取全部车次
       var allTrains = []
+      this.tableData.splice(0,this.tableData.length)
       await this.$http
           .get('/train/queryAllTrainNoPage')
           .then(response => {
@@ -297,15 +297,16 @@ export default {
                 var trainStations = {
                   trainNo: "",
                   trainNumber: "",
-                  startStation: "",
-                  endStation: "",
+                  trainStartStation: "",
+                  trainEndStation: "",
                   trainStartTime: "",
                   trainEndTime: "",
                   allStations: []
                 }
                 trainStations.trainNumber = data[i].trainNumber
-                trainStations.startStation = data[i].startStation
-                trainStations.endStation = data[i].endStation
+                trainStations.trainNo = data[i].trainNo
+                trainStations.trainStartStation = data[i].startStation
+                trainStations.trainEndStation = data[i].endStation
                 trainStations.trainStartTime = data[i].startTime
                 trainStations.trainEndTime = data[i].endTime
                 this.tableData.push(trainStations)
@@ -327,22 +328,24 @@ export default {
       this.$http
         .get('/admin/deletedTrain',{ params: { trainNo: info.trainNo } })
         .then(response => {
-          if (response.status === 200) {
+          if (response.data.success) {
             this.$message({
-            message: "删除成功!",
-            type: "success",
-            showClose: true,
-            duration: 1500,
-          });
+              message: "删除成功!",
+              type: "success",
+              showClose: true,
+              duration: 1500,
+            });
+          } else {
+            this.$message({
+              message: `删除失败!`,
+              type: "error",
+              showClose: true,
+              duration: 1500,
+            });
           }
         })
         .catch(function (error) {
-          this.$message({
-            message: `删除失败!${error}`,
-            type: "error",
-            showClose: true,
-            duration: 1500,
-          });
+          console.log(error)
         });
       // 这里利用filter()函数完成表格刷新，效果最好
       this.tableData = this.tableData.filter(o => {
@@ -354,8 +357,6 @@ export default {
     editTrain(info) {
       this.infoDialogVis = true;
       this.trainInfo = info
-      this.trainInfo.trainStartStation = info.startStation
-      this.trainInfo.trainEndStation = info.endStation
     },
 
     // 确认修改车次
@@ -363,24 +364,27 @@ export default {
       this.$http
         .post('/admin/updateTrain', this.trainInfo)
         .then(response => {
-          if (response.status === 200) {
+          if (response.data.success) {
             this.$message({
-            message: "编辑成功!",
-            type: "success",
-            showClose: true,
-            duration: 1500,
-          });
+              message: "编辑成功!",
+              type: "success",
+              showClose: true,
+              duration: 1500,
+            });
+            this.getInfo()
+            this.infoDialogVis = false
+          } else {
+            this.$message({
+              message: `编辑失败!`,
+              type: "error",
+              showClose: true,
+              duration: 1500,
+            });
           }
-          this.infoDialogVis = false
         })
         .catch(function (error) {
           console.log(error)
-          this.$message({
-            message: `编辑失败!`,
-            type: "error",
-            showClose: true,
-            duration: 1500,
-          });
+          
         });
     },
 
@@ -405,25 +409,26 @@ export default {
         .post('/admin/saveTrain', this.addTrainInfo)
         .then(response => {
           console.log(response)
-          if (response.status === 200) {
+          if (response.data.success) {
             this.$message({
-            message: "增加成功!",
+            message: "添加成功!",
             type: "success",
             showClose: true,
             duration: 1500,
-          });
+            });
+            this.getInfo()
+            this.addDialogVis = false
+          } else {
+            this.$message({
+              message: `添加失败!${response.data.message}!`,
+              type: "error",
+              showClose: true,
+              duration: 1500,
+            });
           }
-          this.addDialogVis = false
-          this.getInfo()
         })
         .catch(function (error) {
           console.log(error)
-          this.$message({
-            message: `增加失败!`,
-            type: "error",
-            showClose: true,
-            duration: 1500,
-          });
         });
     },
 
@@ -460,7 +465,7 @@ export default {
       this.$http
         .get('/admin/deletedByIds?' + deleteIds)
         .then(response => {
-          if (response.status === 200) {
+          if (response.data.success) {
             this.$message({
             message: "删除成功!",
             type: "success",
