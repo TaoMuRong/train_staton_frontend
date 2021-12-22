@@ -435,8 +435,9 @@ export default {
 
     // 查询对应车次下所有经停站
     onSubmit() {
-      this.tableData.splice(0,this.tableData.length)
-      this.getOneTrain(this.trainId)
+      this.tableData = this.tableData.filter(o => {
+        return this.trainId === o.trainNumber
+      })
     },
 
   },
